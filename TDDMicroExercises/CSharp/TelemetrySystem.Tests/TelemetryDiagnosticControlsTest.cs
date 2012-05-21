@@ -9,7 +9,9 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         [Test]
         public void CheckTransmission_should_send_a_diagnostic_message_and_receive_a_status_message_response()
         {
-            var telemetryDiagnosticControls = new TelemetryDiagnosticControls();
+            var telemetryClient = new TelemetryClient();
+
+            var telemetryDiagnosticControls = new TelemetryDiagnosticControls(telemetryClient);
 
             telemetryDiagnosticControls.CheckTransmission();
 
