@@ -13,10 +13,16 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         public void CheckTransmission_should_send_a_diagnostic_message_and_receive_a_status_message_response()
         {
             var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
+            using (telemetryClient.GetMockRepository().Ordered())
+            {
+                telemetryClient
+                    .Stub(client => client.OnlineStatus)
+                    .Return(false).Repeat.Once();
 
-            telemetryClient
-                .Stub(client => client.OnlineStatus)
-                .Return(true);
+                telemetryClient
+                   .Stub(client => client.OnlineStatus)
+                   .Return(true);
+            }
 
             telemetryClient
                 .Stub(client => client.Receive())
@@ -25,10 +31,50 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
             var telemetryDiagnosticControls = new TelemetryDiagnosticControls(telemetryClient);
 
             telemetryDiagnosticControls.CheckTransmission();
-            
+
+            telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything));
             telemetryClient.AssertWasCalled(client => client.Send(TelemetryClient.DiagnosticMessage));
 
             Assert.That(telemetryDiagnosticControls.DiagnosticInfo, Is.EqualTo(ExpectedTelemetryClientResponse));
         }
+
+        [Test,ExpectedException(typeof(System.Exception),ExpectedMessage = "Unable to connect.")]
+        public void CheckTransmission_ThrowsAfterThreeFailedConnections()
+        {
+            var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
+
+            telemetryClient
+                .Stub(client => client.OnlineStatus)
+                .Return(false)
+                .Repeat.Times(3);
+
+            var telemetryDiagnosticControls = new TelemetryDiagnosticControls(telemetryClient);
+
+            telemetryDiagnosticControls.CheckTransmission();
+        }
+
+        [Test]
+        public void CheckTransmission_ConnectsOnThirdConnectionRetry()
+        {
+            var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
+
+            using (telemetryClient.GetMockRepository().Ordered())
+            {
+                telemetryClient
+                    .Stub(client => client.OnlineStatus)
+                    .Return(false)
+                    .Repeat.Times(2);
+
+                telemetryClient
+                    .Stub(client => client.OnlineStatus)
+                    .Return(true);
+            }
+            var telemetryDiagnosticControls = new TelemetryDiagnosticControls(telemetryClient);
+
+            telemetryDiagnosticControls.CheckTransmission();
+
+            telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything));
+        }
+
     }
 }
