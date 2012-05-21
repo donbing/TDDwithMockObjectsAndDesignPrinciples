@@ -2,18 +2,27 @@ using System;
 
 namespace TDDMicroExercises.TelemetrySystem
 {
-	public class TelemetryClient
-	{
+    public interface ITelemetryClient
+    {
+        bool OnlineStatus { get; }
+        void Connect(string telemetryServerConnectionString);
+        void Disconnect();
+        void Send(string message);
+        string Receive();
+    }
+
+    public class TelemetryClient : ITelemetryClient
+    {
 		public const string DiagnosticMessage = "AT#UD";
 
-		private bool _onlineStatus;
-		private string _diagnosticMessageResult = string.Empty;
+		private bool onlineStatus;
+		private string diagnosticMessageResult = string.Empty;
 
-		private readonly Random _connectionEventsSimulator = new Random(42);
+		private readonly Random connectionEventsSimulator = new Random(42);
 
 		public bool OnlineStatus
 		{
-			get { return _onlineStatus; }
+			get { return onlineStatus; }
 		}
 
 		public void Connect(string telemetryServerConnectionString)
@@ -24,15 +33,15 @@ namespace TDDMicroExercises.TelemetrySystem
 			}
 
 			// simulate the operation on a real modem
-			bool success = _connectionEventsSimulator.Next(1, 10) <= 8;
+			bool success = connectionEventsSimulator.Next(1, 10) <= 8;
 
-			_onlineStatus = success;
+			onlineStatus = success;
 
 		}
 
 		public void Disconnect()
 		{
-			_onlineStatus = false;
+			onlineStatus = false;
 		}
 
 		public void Send(string message)
@@ -45,7 +54,7 @@ namespace TDDMicroExercises.TelemetrySystem
 			if (message == DiagnosticMessage)
 			{
 				// simulate a status report
-				_diagnosticMessageResult =
+				diagnosticMessageResult =
 					  "LAST TX rate................ 100 MBPS\r\n"
 					+ "HIGHEST TX rate............. 100 MBPS\r\n"
 					+ "LAST RX rate................ 100 MBPS\r\n"
@@ -71,19 +80,19 @@ namespace TDDMicroExercises.TelemetrySystem
 		{
 			string message;
 
-			if (string.IsNullOrEmpty(_diagnosticMessageResult) == false)
+			if (string.IsNullOrEmpty(diagnosticMessageResult) == false)
 			{
-				message = _diagnosticMessageResult;
-				_diagnosticMessageResult = string.Empty;
+				message = diagnosticMessageResult;
+				diagnosticMessageResult = string.Empty;
 			} 
 			else
 			{                
 				// simulate a received message
 				message = string.Empty;
-				int messageLenght = _connectionEventsSimulator.Next(50, 110);
+				int messageLenght = connectionEventsSimulator.Next(50, 110);
 				for(int i = messageLenght; i >=0; --i)
 				{
-					message += (char)_connectionEventsSimulator.Next(40, 126);
+					message += (char)connectionEventsSimulator.Next(40, 126);
 				}
 			}
 
