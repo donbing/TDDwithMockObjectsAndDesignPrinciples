@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
+using Rhino.Mocks;
 
 namespace TDDMicroExercises.TelemetrySystem.Tests
 {
@@ -9,13 +10,16 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         [Test]
         public void CheckTransmission_should_send_a_diagnostic_message_and_receive_a_status_message_response()
         {
-            var telemetryClient = new TelemetryClient();
+            var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
 
+            telemetryClient.Stub(client => client.OnlineStatus).Return(true);
+            telemetryClient.Stub(client => client.Receive()).Return("foo");
+            
             var telemetryDiagnosticControls = new TelemetryDiagnosticControls(telemetryClient);
 
             telemetryDiagnosticControls.CheckTransmission();
-
-            Assert.That(telemetryDiagnosticControls.DiagnosticInfo, Is.Not.Empty);
+            
+            Assert.That(telemetryDiagnosticControls.DiagnosticInfo, Is.EqualTo("foo"));
         }
 
     }
