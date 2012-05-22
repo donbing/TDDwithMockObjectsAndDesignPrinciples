@@ -17,13 +17,9 @@ namespace TDDMicroExercises.TelemetrySystem
 
     public class TelemetryConnection : IConnection
     {
-        private bool onlineStatus;
-        protected readonly Random connectionEventsSimulator = new Random(42);
+        protected readonly Random ConnectionEventsSimulator = new Random(42);
 
-        public bool OnlineStatus
-        {
-            get { return onlineStatus; }
-        }
+        public bool OnlineStatus { get; private set; }
 
         public void Connect(string telemetryServerConnectionString)
         {
@@ -33,21 +29,22 @@ namespace TDDMicroExercises.TelemetrySystem
             }
 
             // simulate the operation on a real modem
-            var success = connectionEventsSimulator.Next(1, 10) <= 8;
+            var success = ConnectionEventsSimulator.Next(1, 10) <= 8;
 
-            onlineStatus = success;
+            OnlineStatus = success;
         }
 
         public void Disconnect()
         {
-            onlineStatus = false;
+            OnlineStatus = false;
         }
     }
 
     public class TelemetryClient : ITelemetryChannel
     {
         public const string DiagnosticMessage = "AT#UD";
-        protected readonly Random connectionEventsSimulator = new Random(42);
+
+        private readonly Random randomGenerator = new Random(42);
         private string diagnosticMessageResult = string.Empty;
 
         public void Send(string message)
@@ -95,10 +92,10 @@ namespace TDDMicroExercises.TelemetrySystem
 			{                
 				// simulate a received message
 				message = string.Empty;
-				int messageLenght = connectionEventsSimulator.Next(50, 110);
+				int messageLenght = randomGenerator.Next(50, 110);
 				for(int i = messageLenght; i >=0; --i)
 				{
-					message += (char)connectionEventsSimulator.Next(40, 126);
+					message += (char)randomGenerator.Next(40, 126);
 				}
 			}
 
