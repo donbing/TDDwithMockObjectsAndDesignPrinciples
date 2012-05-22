@@ -2,11 +2,15 @@ using System;
 
 namespace TDDMicroExercises.TelemetrySystem
 {
-    public interface ITelemetryClient
+    public interface IConnection
     {
         bool OnlineStatus { get; }
         void Connect(string telemetryServerConnectionString);
         void Disconnect();
+    }
+
+    public interface ITelemetryClient : IConnection
+    {
         void Send(string message);
         string Receive();
     }

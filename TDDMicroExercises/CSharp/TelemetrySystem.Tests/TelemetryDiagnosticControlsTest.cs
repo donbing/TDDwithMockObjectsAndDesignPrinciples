@@ -39,11 +39,15 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
 
             Assert.That(telemetryDiagnosticControls.DiagnosticInfo, Is.EqualTo(ExpectedTelemetryClientResponse));
         }
+    }
 
-        [Test,ExpectedException(typeof(System.Exception),ExpectedMessage = "Unable to connect.")]
+    [TestFixture]
+    public class ConnectionTests
+    {
+        [Test, ExpectedException(typeof(System.Exception), ExpectedMessage = "Unable to connect.")]
         public void CheckConnection_ThrowsAfterThreeFailedConnections()
         {
-            var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
+            var telemetryClient = MockRepository.GenerateMock<IConnection>();
             var telemetryConnection = new TelemetryConnection(telemetryClient);
 
             telemetryClient
@@ -57,7 +61,7 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         [Test]
         public void CheckConnection_ConnectsOnThirdConnectionRetry()
         {
-            var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
+            var telemetryClient = MockRepository.GenerateMock<IConnection>();
             var telemetryConnection = new TelemetryConnection(telemetryClient);
 
             using (telemetryClient.GetMockRepository().Ordered())
@@ -74,6 +78,5 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
             telemetryConnection.TryConnect(3, "any connection string");
             telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything));
         }
-
     }
 }

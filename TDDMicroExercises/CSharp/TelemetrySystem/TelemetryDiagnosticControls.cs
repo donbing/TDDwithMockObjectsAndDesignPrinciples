@@ -37,9 +37,9 @@ namespace TDDMicroExercises.TelemetrySystem
 
     public class TelemetryConnection
     {
-        private readonly ITelemetryClient connection;
+        private readonly IConnection connection;
 
-        public TelemetryConnection(ITelemetryClient connection)
+        public TelemetryConnection(IConnection connection)
         {
             this.connection = connection;
         }
