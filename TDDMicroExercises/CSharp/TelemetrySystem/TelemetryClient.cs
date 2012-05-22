@@ -15,40 +15,42 @@ namespace TDDMicroExercises.TelemetrySystem
         string Receive();
     }
 
-    public class TelemetryClient : ITelemetryChannel, IConnection
+    public class TelemetryConnection : IConnection
     {
-		public const string DiagnosticMessage = "AT#UD";
+        private bool onlineStatus;
+        protected readonly Random connectionEventsSimulator = new Random(42);
 
-		private bool onlineStatus;
-		private string diagnosticMessageResult = string.Empty;
+        public bool OnlineStatus
+        {
+            get { return onlineStatus; }
+        }
 
-		private readonly Random connectionEventsSimulator = new Random(42);
+        public void Connect(string telemetryServerConnectionString)
+        {
+            if (string.IsNullOrEmpty(telemetryServerConnectionString))
+            {
+                throw new ArgumentNullException();
+            }
 
-		public bool OnlineStatus
-		{
-			get { return onlineStatus; }
-		}
+            // simulate the operation on a real modem
+            var success = connectionEventsSimulator.Next(1, 10) <= 8;
 
-		public void Connect(string telemetryServerConnectionString)
-		{
-			if (string.IsNullOrEmpty(telemetryServerConnectionString))
-			{
-				throw new ArgumentNullException();
-			}
+            onlineStatus = success;
+        }
 
-			// simulate the operation on a real modem
-			bool success = connectionEventsSimulator.Next(1, 10) <= 8;
+        public void Disconnect()
+        {
+            onlineStatus = false;
+        }
+    }
 
-			onlineStatus = success;
+    public class TelemetryClient : TelemetryConnection, ITelemetryChannel
+    {
+        public const string DiagnosticMessage = "AT#UD";
+        protected readonly Random connectionEventsSimulator = new Random(42);
+        private string diagnosticMessageResult = string.Empty;
 
-		}
-
-		public void Disconnect()
-		{
-			onlineStatus = false;
-		}
-
-		public void Send(string message)
+        public void Send(string message)
 		{
 			if (string.IsNullOrEmpty(message))
 			{

@@ -14,7 +14,7 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         {
             var channel = MockRepository.GenerateMock<ITelemetryChannel>();
             var connetion = MockRepository.GenerateMock<IConnection>();
-            var telemetryConnection = new TelemetryConnection(connetion);
+            var telemetryConnection = new TelemetryConnector(connetion);
 
             using (channel.GetMockRepository().Ordered())
             {
@@ -49,7 +49,7 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         public void CheckConnection_ThrowsAfterThreeFailedConnections()
         {
             var telemetryClient = MockRepository.GenerateMock<IConnection>();
-            var telemetryConnection = new TelemetryConnection(telemetryClient);
+            var telemetryConnection = new TelemetryConnector(telemetryClient);
 
             using (telemetryClient.GetMockRepository().Ordered())
             {
@@ -71,7 +71,7 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         public void CheckConnection_ConnectsOnThirdConnectionRetry()
         {
             var telemetryClient = MockRepository.GenerateMock<IConnection>();
-            var telemetryConnection = new TelemetryConnection(telemetryClient);
+            var telemetryConnection = new TelemetryConnector(telemetryClient);
 
             using (telemetryClient.GetMockRepository().Ordered())
             {
