@@ -9,10 +9,12 @@ namespace TDDMicroExercises.TelemetrySystem
         
         private readonly ITelemetryClient telemetryClient;
         private string diagnosticInfo = string.Empty;
+        private readonly TelemetryConnection telemetryConnection;
 
         public TelemetryDiagnosticControls(ITelemetryClient client)
         {
             telemetryClient = client;
+            telemetryConnection = new TelemetryConnection(telemetryClient);
         }
 
         public string DiagnosticInfo
@@ -25,7 +27,7 @@ namespace TDDMicroExercises.TelemetrySystem
         {
             diagnosticInfo = string.Empty;
 
-            new TelemetryConnection(telemetryClient).TryConnect(3, DiagnosticChannelConnectionString);
+            telemetryConnection.TryConnect(3, DiagnosticChannelConnectionString);
 
             telemetryClient.Send(TelemetryClient.DiagnosticMessage);
 
@@ -59,17 +61,17 @@ namespace TDDMicroExercises.TelemetrySystem
             }
         }
 
-        private void Connect(string connectionString)
+        public void Connect(string connectionString)
         {
             connection.Connect(connectionString);
         }
 
-        private void Disconnect()
+        public void Disconnect()
         {
             connection.Disconnect();
         }
 
-        protected bool OnlineStatus
+        public bool OnlineStatus
         {
             get { return connection.OnlineStatus; }
         }
