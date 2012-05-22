@@ -44,7 +44,7 @@ namespace TDDMicroExercises.TelemetrySystem
         }
     }
 
-    public class TelemetryClient : TelemetryConnection, ITelemetryChannel
+    public class TelemetryClient : ITelemetryChannel
     {
         public const string DiagnosticMessage = "AT#UD";
         protected readonly Random connectionEventsSimulator = new Random(42);
