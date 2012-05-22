@@ -25,20 +25,23 @@ namespace TDDMicroExercises.TelemetrySystem
         {
             diagnosticInfo = string.Empty;
 
-            TryConnect(3, telemetryClient);
+            TelemetryConnection.TryConnect(3, telemetryClient, DiagnosticChannelConnectionString);
 
             telemetryClient.Send(TelemetryClient.DiagnosticMessage);
 
             diagnosticInfo = telemetryClient.Receive();
         }
+    }
 
-        private static void TryConnect(int retryCount, ITelemetryClient connection)
+    public class TelemetryConnection
+    {
+        public static void TryConnect(int retryCount, ITelemetryClient connection, string diagnosticChannelConnectionString)
         {
             connection.Disconnect();
 
             while (connection.OnlineStatus == false && retryCount > 0)
             {
-                connection.Connect(DiagnosticChannelConnectionString);
+                connection.Connect(diagnosticChannelConnectionString);
                 retryCount -= 1;
             }
 
