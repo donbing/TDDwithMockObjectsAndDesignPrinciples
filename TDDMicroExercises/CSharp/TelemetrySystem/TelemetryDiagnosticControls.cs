@@ -7,14 +7,14 @@ namespace TDDMicroExercises.TelemetrySystem
     {
         private const string DiagnosticChannelConnectionString = "*111#";
         
-        private readonly ITelemetryClient telemetryClient;
+        private readonly ITelemetryChannel channel;
+        private readonly TelemetryConnection connection;
         private string diagnosticInfo = string.Empty;
-        private readonly TelemetryConnection telemetryConnection;
 
-        public TelemetryDiagnosticControls(ITelemetryClient client, TelemetryConnection connection)
+        public TelemetryDiagnosticControls(ITelemetryChannel client, TelemetryConnection connection)
         {
-            telemetryClient = client;
-            telemetryConnection = connection;
+            channel = client;
+            this.connection = connection;
         }
 
         public string DiagnosticInfo
@@ -27,11 +27,11 @@ namespace TDDMicroExercises.TelemetrySystem
         {
             diagnosticInfo = string.Empty;
 
-            telemetryConnection.TryConnect(3, DiagnosticChannelConnectionString);
+            connection.TryConnect(3, DiagnosticChannelConnectionString);
 
-            telemetryClient.Send(TelemetryClient.DiagnosticMessage);
+            channel.Send(TelemetryClient.DiagnosticMessage);
 
-            diagnosticInfo = telemetryClient.Receive();
+            diagnosticInfo = channel.Receive();
         }
     }
 

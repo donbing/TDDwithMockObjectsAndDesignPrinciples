@@ -12,30 +12,31 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
         [Test]
         public void CheckTransmission_should_send_a_diagnostic_message_and_receive_a_status_message_response()
         {
-            var telemetryClient = MockRepository.GenerateMock<ITelemetryClient>();
-            var telemetryConnection = new TelemetryConnection(telemetryClient);
+            var channel = MockRepository.GenerateMock<ITelemetryChannel>();
+            var connetion = MockRepository.GenerateMock<IConnection>();
+            var telemetryConnection = new TelemetryConnection(connetion);
 
-            using (telemetryClient.GetMockRepository().Ordered())
+            using (channel.GetMockRepository().Ordered())
             {
-                telemetryClient
+                connetion
                     .Stub(client => client.OnlineStatus)
                     .Return(false).Repeat.Once();
 
-                telemetryClient
+                connetion
                    .Stub(client => client.OnlineStatus)
                    .Return(true);
             }
 
-            telemetryClient
+            channel
                 .Stub(client => client.Receive())
                 .Return(ExpectedTelemetryClientResponse);
 
-            var telemetryDiagnosticControls = new TelemetryDiagnosticControls(telemetryClient, telemetryConnection);
+            var telemetryDiagnosticControls = new TelemetryDiagnosticControls(channel, telemetryConnection);
 
             telemetryDiagnosticControls.CheckTransmission();
 
-            telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything));
-            telemetryClient.AssertWasCalled(client => client.Send(TelemetryClient.DiagnosticMessage));
+            connetion.AssertWasCalled(conn => conn.Connect(Arg<string>.Is.Anything));
+            channel.AssertWasCalled(client => client.Send(TelemetryClient.DiagnosticMessage));
 
             Assert.That(telemetryDiagnosticControls.DiagnosticInfo, Is.EqualTo(ExpectedTelemetryClientResponse));
         }
@@ -59,6 +60,7 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
                     .Return(false)
                     .Repeat.Times(3);
             }
+
             telemetryConnection.TryConnect(3, "any connection string");
 
             telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything), opt => opt.Repeat.Times(2));
@@ -73,7 +75,6 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
 
             using (telemetryClient.GetMockRepository().Ordered())
             {
-
                 telemetryClient.Expect(client => client.Disconnect());
 
                 telemetryClient
@@ -85,7 +86,9 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
                     .Stub(client => client.OnlineStatus)
                     .Return(true);
             }
+
             telemetryConnection.TryConnect(3, "any connection string");
+
             telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything),opt => opt.Repeat.Times(2));
             telemetryClient.VerifyAllExpectations();
         }

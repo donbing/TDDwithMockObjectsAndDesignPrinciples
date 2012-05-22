@@ -9,13 +9,13 @@ namespace TDDMicroExercises.TelemetrySystem
         void Disconnect();
     }
 
-    public interface ITelemetryClient : IConnection
+    public interface ITelemetryChannel
     {
         void Send(string message);
         string Receive();
     }
 
-    public class TelemetryClient : ITelemetryClient
+    public class TelemetryClient : ITelemetryChannel, IConnection
     {
 		public const string DiagnosticMessage = "AT#UD";
 
