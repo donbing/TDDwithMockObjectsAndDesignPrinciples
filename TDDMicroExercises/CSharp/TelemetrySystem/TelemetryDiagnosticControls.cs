@@ -11,10 +11,10 @@ namespace TDDMicroExercises.TelemetrySystem
         private string diagnosticInfo = string.Empty;
         private readonly TelemetryConnection telemetryConnection;
 
-        public TelemetryDiagnosticControls(ITelemetryClient client)
+        public TelemetryDiagnosticControls(ITelemetryClient client, TelemetryConnection connection)
         {
             telemetryClient = client;
-            telemetryConnection = new TelemetryConnection(telemetryClient);
+            telemetryConnection = connection;
         }
 
         public string DiagnosticInfo
@@ -46,16 +46,15 @@ namespace TDDMicroExercises.TelemetrySystem
         
         public void TryConnect(int retryCount, string diagnosticChannelConnectionString)
         {
-            var conn = this;
-            conn.Disconnect();
+            Disconnect();
 
-            while (conn.OnlineStatus == false && retryCount > 0)
+            while (OnlineStatus == false && retryCount > 0)
             {
-                conn.Connect(diagnosticChannelConnectionString);
+                Connect(diagnosticChannelConnectionString);
                 retryCount -= 1;
             }
 
-            if (conn.OnlineStatus == false)
+            if (OnlineStatus == false)
             {
                 throw new Exception("Unable to connect.");
             }
