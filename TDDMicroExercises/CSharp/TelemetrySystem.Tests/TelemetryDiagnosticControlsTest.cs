@@ -50,12 +50,19 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
             var telemetryClient = MockRepository.GenerateMock<IConnection>();
             var telemetryConnection = new TelemetryConnection(telemetryClient);
 
-            telemetryClient
-                .Stub(client => client.OnlineStatus)
-                .Return(false)
-                .Repeat.Times(3);
+            using (telemetryClient.GetMockRepository().Ordered())
+            {
+                telemetryClient.Expect(client => client.Disconnect());
 
+                telemetryClient
+                    .Stub(client => client.OnlineStatus)
+                    .Return(false)
+                    .Repeat.Times(3);
+            }
             telemetryConnection.TryConnect(3, "any connection string");
+
+            telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything), opt => opt.Repeat.Times(2));
+            telemetryClient.VerifyAllExpectations();
         }
 
         [Test]
@@ -66,6 +73,9 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
 
             using (telemetryClient.GetMockRepository().Ordered())
             {
+
+                telemetryClient.Expect(client => client.Disconnect());
+
                 telemetryClient
                     .Stub(client => client.OnlineStatus)
                     .Return(false)
@@ -76,7 +86,8 @@ namespace TDDMicroExercises.TelemetrySystem.Tests
                     .Return(true);
             }
             telemetryConnection.TryConnect(3, "any connection string");
-            telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything));
+            telemetryClient.AssertWasCalled(client => client.Connect(Arg<string>.Is.Anything),opt => opt.Repeat.Times(2));
+            telemetryClient.VerifyAllExpectations();
         }
     }
 }
