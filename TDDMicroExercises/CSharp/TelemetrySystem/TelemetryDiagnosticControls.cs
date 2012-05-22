@@ -35,20 +35,43 @@ namespace TDDMicroExercises.TelemetrySystem
 
     public class TelemetryConnection
     {
+        private readonly ITelemetryClient connection;
+
+        private TelemetryConnection(ITelemetryClient connection)
+        {
+            this.connection = connection;
+        }
+        
         public static void TryConnect(int retryCount, ITelemetryClient connection, string diagnosticChannelConnectionString)
         {
-            connection.Disconnect();
+            var conn = new TelemetryConnection(connection);
+            conn.Disconnect();
 
-            while (connection.OnlineStatus == false && retryCount > 0)
+            while (conn.OnlineStatus == false && retryCount > 0)
             {
-                connection.Connect(diagnosticChannelConnectionString);
+                conn.Connect(diagnosticChannelConnectionString);
                 retryCount -= 1;
             }
 
-            if (connection.OnlineStatus == false)
+            if (conn.OnlineStatus == false)
             {
                 throw new Exception("Unable to connect.");
             }
+        }
+
+        private void Connect(string connectionString)
+        {
+            connection.Connect(connectionString);
+        }
+
+        private void Disconnect()
+        {
+            connection.Disconnect();
+        }
+
+        protected bool OnlineStatus
+        {
+            get { return connection.OnlineStatus; }
         }
     }
 }
